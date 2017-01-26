@@ -75,7 +75,7 @@ module XcodeInstall
       if password.nil?
         `sudo -p "Please authenticate for Xcode installation.\nPassword: " #{command}`
       else
-        `echo #{password} | sudo -S #{command}`
+        `echo #{password} | sudo -S -p "" #{command}`
       end
     end
 
@@ -390,11 +390,15 @@ HELP
       result ? dmg_path : nil
     end
 
-    def install
+    def install(password = nil)
       download unless dmg_path.exist?
       prepare_package unless pkg_path.exist?
       puts "Please authenticate to install #{name}..."
-      `sudo installer -pkg #{pkg_path} -target /`
+      if password.nil?
+        `sudo installer -pkg #{pkg_path} -target /`
+      else
+        `echo #{password} | sudo -S -p "" installer -pkg #{pkg_path} -target /`
+      end
       fail Informative, "Could not install #{name}, please try again" unless installed?
       source_receipts_dir = '/private/var/db/receipts'
       target_receipts_dir = "#{@install_prefix}/System/Library/Receipts"

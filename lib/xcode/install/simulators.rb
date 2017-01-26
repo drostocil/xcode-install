@@ -7,12 +7,14 @@ module XcodeInstall
       self.summary = 'List or install iOS simulators.'
 
       def self.options
-        [['--install=name', 'Install simulator beginning with name, e.g. \'iOS 8.4\', \'tvOS 9.0\'.']].concat(super)
+        [['--install=name', 'Install simulator beginning with name, e.g. \'iOS 8.4\', \'tvOS 9.0\'.'],
+         ['--password', 'System password']].concat(super)
       end
 
       def initialize(argv)
         @installed_xcodes = Installer.new.installed_versions
         @install = argv.option('install')
+        @password = argv.option('password')
         super
       end
 
@@ -36,7 +38,7 @@ module XcodeInstall
         simulator = filtered_simulators.first
         fail Informative, "#{simulator.name} is already installed." if simulator.installed?
         puts "Installing #{simulator.name} for Xcode #{simulator.xcode.bundle_version}..."
-        simulator.install
+        simulator.install(@password)
       else
         puts "[!] More than one simulator matching #{@install} was found. Please specify the full version.".ansi.red
         filtered_simulators.each do |candidate|
